@@ -22,8 +22,16 @@ public class DBImp {
     private Context context;
     private OrderDBHelper ordersDBHelper;
     private final String[] ORDER_COLUMNS = new String[]{"Id", "name", "height", "weight", "date"};
+    public static DBImp imp;
 
-    public DBImp(Context context) {
+    public static DBImp getInstance(Context context) {
+        if (imp == null) {
+            imp = new DBImp(context);
+        }
+        return imp;
+    }
+
+    private DBImp(Context context) {
         this.context = context;
         ordersDBHelper = new OrderDBHelper(context);
     }

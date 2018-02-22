@@ -10,4 +10,6 @@
     <string name="name">姓名</string>
     <string name="height">身高</string>
     <string name="save">保存</string>
+    <string name="weight">体重：</string>
+    <string name="date">日期：</string>
 </resources>
