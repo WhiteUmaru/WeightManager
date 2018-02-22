@@ -1,3 +1,13 @@
 <resources>
-    <string name="app_name">MyBodyManage</string>
+    <string name="app_name">体重管理器</string>
+    <string name="add_weight">记录体重</string>
+    <string name="look_weight">查看记录</string>
+    <string name="result">称量结果</string>
+    <string name="title">小土豆的体重记录仪</string>
+    <string name="user">个人信息</string>
+    <string name="title_activity_user">UserActivity</string>
+    <string name="userMsg">用户个人信息</string>
+    <string name="name">姓名</string>
+    <string name="height">身高</string>
+    <string name="save">保存</string>
 </resources>
