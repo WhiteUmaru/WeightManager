@@ -1,11 +1,20 @@
 package com.gank.mybodymanage.entry;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * 实体类
- * Created by Ly on 2018/2/22.
+ *
+ * @author Ly
+ * @date 2018/2/22
  */
 
 public class Body {
+
+    private int id;
+
+
 
     private String name;
     private int weight;
@@ -16,13 +25,27 @@ public class Body {
         return name;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public Body(String name, int weight, int height, int date) {
         this.name = name;
         this.weight = weight;
         this.height = height;
         this.date = date;
     }
-
+    public Body(int id, String name, int weight, int height, int date) {
+        this.id = id;
+        this.name = name;
+        this.weight = weight;
+        this.height = height;
+        this.date = date;
+    }
     public void setName(String name) {
         this.name = name;
     }
@@ -46,12 +69,16 @@ public class Body {
 
     @Override
     public String toString() {
-        return "Body{" +
-                "name='" + name + '\'' +
-                ", weight=" + weight +
-                ", height=" + height +
-                ", date=" + date +
-                '}';
+        JSONObject object = new JSONObject();
+        try {
+            object.put("name", name);
+            object.put("weight", weight);
+            object.put("height", height);
+            object.put("date", date);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return object.toString();
     }
 
     public int getWeight() {
@@ -69,4 +96,5 @@ public class Body {
     public void setHeight(int height) {
         this.height = height;
     }
+
 }

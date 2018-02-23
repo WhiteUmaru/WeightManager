@@ -51,5 +51,11 @@
         android:onClick="userMsg"
         android:text="@string/user" />
 
+    <Button
+        android:layout_width="120dp"
+        android:layout_height="50dp"
+        android:onClick="chooseUser"
+        android:text="@string/chooseUser" />
+
 
 </LinearLayout>

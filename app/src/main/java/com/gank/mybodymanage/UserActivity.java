@@ -8,6 +8,8 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.gank.mybodymanage.entry.Body;
+import com.gank.mybodymanage.sql.DBImp;
 import com.gank.mybodymanage.util.Util;
 
 /**
@@ -36,13 +38,22 @@ public class UserActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        name.setText(Util.getString(this,Util.USER_NAME,"姓名"));
-        height.setText(Util.getInt(this,Util.USER_HEIGHT,180)+"");
+        name.setText(Util.getString(this, Util.USER_NAME, "姓名"));
+        height.setText(Util.getInt(this, Util.USER_HEIGHT, 180) + "");
     }
 
     public void save(View view) {
-        Util.saveString(this, Util.USER_NAME, name.getText().toString());
-        Util.saveInt(this, Util.USER_HEIGHT, Integer.valueOf(height.getText().toString()));
+        Body body = new Body();
+        body.setName(name.getText().toString());
+        body.setHeight(Integer.valueOf(height.getText().toString()));
+        Util.saveString(this, Util.USER_NAME, body.getName());
+        Util.saveInt(this, Util.USER_HEIGHT, body.getHeight());
+        DBImp imp = DBImp.getInstance(this);
+        int res = imp.addUser(body);
+        if (res < 0) {
+            Toast.makeText(this, "保存失败", Toast.LENGTH_SHORT).show();
+            return;
+        }
         Toast.makeText(this, "已保存", Toast.LENGTH_SHORT).show();
         finish();
     }
