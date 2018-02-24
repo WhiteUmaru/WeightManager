@@ -75,7 +75,7 @@ public class UserActivity extends AppCompatActivity {
             user.setHeight(userHeight);
             imp.updateUser(user);
         } else {
-            addUser(userName, userHeight);
+            user = addUser(userName, userHeight);
         }
         saveDate(user);
         finish();

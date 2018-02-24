@@ -21,6 +21,7 @@ public class MyApplication extends Application {
         super.onCreate();
         int SERVICE_ID = 155260;
         String entry = "Ly" + Build.MODEL;
+        Log.e("", "onCreate: "+ entry);
         entry = entry.replaceAll(" ", "");
         Log.e("app", "onCreate: " + entry);
         Trace mTrace = new Trace(SERVICE_ID, entry, true);
