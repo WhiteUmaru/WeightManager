@@ -1,11 +1,13 @@
 package com.gank.mybodymanage.entry;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.gank.mybodymanage.R;
@@ -27,6 +29,8 @@ public class MyAdapter extends BaseAdapter {
     private Context context;
     private ArrayList<Body> data;
     private LayoutInflater inflater;
+    public static final double STANDARD = 18.5;
+    public static final double OVER_WEIGHT = 24;
 
     public MyAdapter(Context context, ArrayList<Body> data) {
         this.context = context;
@@ -58,18 +62,27 @@ public class MyAdapter extends BaseAdapter {
             holder = new ViewHolder();
             holder.weight = convertView.findViewById(R.id.weight);
             holder.date = convertView.findViewById(R.id.date);
+            holder.bmi = convertView.findViewById(R.id.bmi);
+            holder.background = convertView.findViewById(R.id.background);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
         Body body = data.get(position);
         float weight = body.getWeight();
-        holder.weight.setText(weight / 100 + "");
+        holder.weight.setText(String.valueOf(weight / 100));
         holder.date.setText(getDateForYear(body.getDate()));
+        float bmi = body.getBMI();
+        bmi = bmi / 10;
+        if (bmi > OVER_WEIGHT) {
+            holder.background.setBackgroundColor(Color.RED);
+        }
+        holder.bmi.setText(String.valueOf(bmi));
         return convertView;
     }
 
     class ViewHolder {
-        TextView weight, date;
+        TextView weight, date, bmi;
+        LinearLayout background;
     }
 }

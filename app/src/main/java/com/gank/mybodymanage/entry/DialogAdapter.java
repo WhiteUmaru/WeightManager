@@ -24,10 +24,10 @@ import static com.gank.mybodymanage.util.Util.getDateForYear;
 public class DialogAdapter extends BaseAdapter {
 
     private Context context;
-    private ArrayList<Body> data;
+    private ArrayList<User> data;
     private LayoutInflater inflater;
 
-    public DialogAdapter(Context context, ArrayList<Body> data) {
+    public DialogAdapter(Context context, ArrayList<User> data) {
         this.context = context;
         this.data = data;
         inflater = LayoutInflater.from(context);
@@ -60,7 +60,7 @@ public class DialogAdapter extends BaseAdapter {
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
-        Body body = data.get(position);
+        User body = data.get(position);
         holder.name.setText(body.getName());
         holder.height.setText(body.getHeight() + "");
         return convertView;

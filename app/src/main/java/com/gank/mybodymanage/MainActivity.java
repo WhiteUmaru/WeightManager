@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Dialog;
 import android.app.SearchManager;
 import android.content.ComponentName;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -21,6 +22,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -29,6 +31,7 @@ import android.widget.Toast;
 
 import com.gank.mybodymanage.entry.Body;
 import com.gank.mybodymanage.entry.DialogAdapter;
+import com.gank.mybodymanage.entry.User;
 import com.gank.mybodymanage.sql.DBImp;
 import com.gank.mybodymanage.util.Util;
 
@@ -72,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         String viewTitle = Util.getString(this, Util.USER_NAME, "小土豆");
-        title.setText(viewTitle + "的体重记录仪");
+        title.setText(viewTitle + "\n体重记录仪");
     }
 
 
@@ -87,13 +90,8 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "请填写体重", Toast.LENGTH_SHORT).show();
             return;
         }
-        Body body = new Body();
-        body.setWeight(getWeight(weight));
-        body.setHeight(Util.getInt(this, Util.USER_HEIGHT, 180));
-        int now = (int) (System.currentTimeMillis() / 1000);
-        body.setDate(now);
-        body.setName(Util.getString(this, Util.USER_NAME, "Ly"));
-        imp.add(body);
+
+        imp.add(getWeight(view, weight));
     }
 
     /**
@@ -122,64 +120,117 @@ public class MainActivity extends AppCompatActivity {
      * @param view 界面
      */
     public void chooseUser(View view) {
-        final ArrayList<Body> user = imp.getAllUser();
-        ///新功能预留代码 下版本上线
-//        PackageManager manager = getPackageManager();
-//        List<PackageInfo> packages = manager.getInstalledPackages(0);
-//        for (PackageInfo pi : packages) {
-//            // 列出普通应用
-//            if ((pi.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) <= 0) {
-//                Log.e(TAG, "普通应用: " + manager.getApplicationLabel(pi.applicationInfo));
-//            }
-//            // 列出系统应用，总是感觉这里设计的有问题，希望高手指点
-//            if ((pi.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) > 0) {
-//                Log.e(TAG, "系统应用: " + pi.toString());
-//            }
-//        }
-//
-//
-//        try {
-//            startActivity(getPackageManager().getLaunchIntentForPackage("com.jianshu.haruki"));
-//        } catch (Exception e) {
-//            Toast.makeText(this, "No app", Toast.LENGTH_SHORT).show();
-//        }
+        final ArrayList<User> users = imp.getAllUser();
+        Log.e(TAG, "chooseUser: " + users);
 
-
-        if (user == null || user.isEmpty()) {
+        if (users == null || users.isEmpty()) {
             Toast.makeText(this, "无用户，请创建", Toast.LENGTH_SHORT).show();
             userMsg(view);
             return;
         }
+        //创建弹窗
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         final Dialog dialog = builder.create();
         LayoutInflater inflater = LayoutInflater.from(this);
+        //创建界面
         View v = inflater.inflate(R.layout.dialog_view, null);
+        //初始化组件
         Button bt = v.findViewById(R.id.dialog_bt);
-        bt.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog.dismiss();
-            }
-        });
+        bt.setOnClickListener(v1 -> dialog.dismiss());
+
         ListView listView = v.findViewById(R.id.select_dialog_listview);
-        listView.setAdapter(new DialogAdapter(this, user));
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Body body = user.get(position);
-                Util.saveString(MainActivity.this, Util.USER_NAME, body.getName());
-                Util.saveInt(MainActivity.this, Util.USER_HEIGHT, body.getHeight());
-                title.setText(body.getName() + "的体重记录仪");
-                dialog.dismiss();
-            }
+        listView.setAdapter(new DialogAdapter(this, users));
+        listView.setOnItemClickListener((parent, view12, position, id) -> {
+            chooseUser(users, position);
+            dialog.dismiss();
         });
+        listView.setOnItemLongClickListener((parent, view1, position, id) -> {
+            Util.createDialog(MainActivity.this, "删除用户", "是否删除该条用户信息",
+                    (log, which) -> {
+                        int res = imp.deleteUser(users.get(position));
+                        Log.e(TAG, "chooseUser: " + res);
+                        users.remove(position);
+                        if (users.size() > 0) {
+                            chooseUser(users, 0);
+                        }
+                        log.dismiss();
+                        dialog.dismiss();
+                    }).show();
+            return false;
+        });
+
         dialog.show();
         dialog.getWindow().setContentView(v);
     }
 
-    private int getWeight(String weight) {
+    private Body getWeight(View view, String weight) {
         double tz = Double.valueOf(weight);
-        return (int) (tz * 100);
+        int height = Util.getInt(this, Util.USER_HEIGHT, -1);
+        if (height == -1) {
+            userMsg(view);
+        }
+        Body body = new Body();
+        body.setWeight((int) (tz * 100));
+        body.setHeight(height);
+        body.setUserId(Util.getInt(this, Util.USER_ID, 1));
+        int now = (int) (System.currentTimeMillis() / 1000);
+        body.setDate(now);
+        body.setName(Util.getString(this, Util.USER_NAME, "Ly"));
+        double bmi = (tz / (height * height)) * 100000;
+        Log.e(TAG, "bmi: --" + bmi);
+        body.setBMI((int) bmi);
+        return body;
     }
 
+    private void chooseUser(ArrayList<User> users, int position) {
+        User userBody = users.get(position);
+        Util.saveString(MainActivity.this, Util.USER_NAME, userBody.getName());
+        Util.saveInt(MainActivity.this, Util.USER_HEIGHT, userBody.getHeight());
+        Util.saveString(MainActivity.this, Util.USER, userBody.toString());
+        title.setText(String.valueOf(userBody.getName() + "\n体重记录仪"));
+
+    }
+
+    public void playGame(View view) {
+        ///新功能预留代码 下版本上线
+        PackageManager manager = getPackageManager();
+        List<PackageInfo> packages = manager.getInstalledPackages(0);
+        ArrayList<String> gameNames = new ArrayList<>();
+        ArrayList<PackageInfo> gameInfo = new ArrayList<>();
+        for (PackageInfo pi : packages) {
+            // 列出普通应用
+            if ((pi.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) <= 0) {
+                String appName = manager.getApplicationLabel(pi.applicationInfo).toString();
+                gameNames.add(appName);
+                gameInfo.add(pi);
+            }
+        }
+        ListView listView = new ListView(this);
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_expandable_list_item_1, gameNames);
+        listView.setAdapter(arrayAdapter);
+        listView.setOnItemClickListener((AdapterView<?> parent, View v, int position, long id) -> {
+            try {
+                startActivity(getPackageManager().getLaunchIntentForPackage(gameInfo.get(position).packageName));
+            } catch (Exception e) {
+                Toast.makeText(this, "No app", Toast.LENGTH_SHORT).show();
+            }
+        });
+        new AlertDialog.Builder(this)
+                .setView(listView)
+                .setTitle("玩个游戏吧")
+                .setNegativeButton("取消", null)
+                .create().show();
+
+    }
+
+    private final String[] gameList = new String[]{"消消乐", "地主", "荣耀", "师", "麻将"};
+
+    private boolean isGame(String game) {
+        for (String s : gameList) {
+            if (game.contains(s)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

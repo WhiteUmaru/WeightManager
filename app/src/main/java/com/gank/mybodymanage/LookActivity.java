@@ -1,17 +1,25 @@
 package com.gank.mybodymanage;
 
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Build;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.InputType;
+import android.text.method.DialerKeyListener;
+import android.text.method.DigitsKeyListener;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -74,33 +82,44 @@ public class LookActivity extends AppCompatActivity {
         adapter = new MyAdapter(this, data);
         lv = findViewById(R.id.lv);
         lv.setAdapter(adapter);
-        lv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(LookActivity.this)
-                        .setTitle("删除数据")
-                        .setMessage("是否删除该条体重信息")
-                        .setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        })
-                        .setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                imp.deleteMsg(data.get(position));
-                                data.remove(position);
-                                lines.remove(position);
-                                suitlines.feedWithAnim(lines);
-                                adapter.notifyDataSetChanged();
-                                dialog.dismiss();
-                            }
-                        });
-                builder.create().show();
-                return false;
-            }
+        lv.setOnItemLongClickListener((parent, view, position, id) -> {
+            Util.createDialog(LookActivity.this, "删除数据", "是否删除该条体重信息",
+                    (log, which) -> {
+                        //删除按钮的监听
+                        imp.deleteMsg(data.get(position));
+                        data.remove(position);
+                        lines.remove(position);
+                        suitlines.feedWithAnim(lines);
+                        adapter.notifyDataSetChanged();
+                        log.dismiss();
+                    }, (log, which) -> {
+                        //修改按钮的监听
+                        Body body = data.get(position);
+                        EditText weight = new EditText(LookActivity.this);
+                        weight.setHint(String.valueOf(((double) body.getWeight()) / 100));
+                        weight.setKeyListener(new DigitsKeyListener(false, true));
+                        new AlertDialog.Builder(this)
+                                .setTitle("修改体重")
+                                .setView(weight)
+                                .setNegativeButton("取消", null)
+                                .setPositiveButton("确定", (l, w) -> {
+                                    double tz = Double.valueOf(weight.getText().toString());
+                                    body.setWeight((int) (tz * 100));
+                                    imp.updateMsg(body);
+                                    data.remove(position);
+                                    lines.remove(position);
+                                    data.add(position, body);
+                                    lines.add(position, new Unit((float) tz, getDate(body.getDate())));
+                                    suitlines.feedWithAnim(lines);
+                                    adapter.notifyDataSetChanged();
+                                    l.dismiss();
+                                    log.dismiss();
+                                }).create().show();
+                    }).show();
+            return false;
         });
+
+
     }
 
     @Override

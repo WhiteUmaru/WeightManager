@@ -2,42 +2,52 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/background"
     android:orientation="horizontal">
 
     <TextView
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
-        android:layout_width="80dp"
+        android:layout_width="50dp"
         android:layout_height="match_parent"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp"
         android:gravity="center"
-        android:textColor="@android:color/black"
         android:text="@string/weight"
-        android:textSize="18sp"/>
+        android:textColor="@android:color/black"
+        android:textSize="15sp" />
 
     <TextView
         android:id="@+id/weight"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:textSize="18sp"
         android:layout_weight="2"
-        android:gravity="center" />
+        android:gravity="center"
+        android:textSize="12sp" />
 
     <TextView
-        android:layout_width="80dp"
+        android:layout_width="50dp"
         android:layout_height="match_parent"
         android:gravity="center"
+        android:text="@string/date"
         android:textColor="@android:color/black"
-        android:textSize="18sp"
-        android:text="@string/date"/>
+        android:textSize="15sp" />
 
     <TextView
         android:id="@+id/date"
-        android:layout_width="0dp"
+        style="@style/title"
+        android:layout_weight="8" />
+
+    <TextView
+        android:layout_width="40dp"
         android:layout_height="match_parent"
-        android:textSize="15sp"
-        android:layout_weight="5"
         android:gravity="center"
-        android:textColor="@android:color/black" />
+        android:text="@string/bmi"
+        android:textColor="@android:color/black"
+        android:textSize="15sp" />
+
+    <TextView
+        android:id="@+id/bmi"
+        style="@style/title"
+        android:layout_weight="2" />
 
 
 </LinearLayout>
